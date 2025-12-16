@@ -77,6 +77,8 @@ class KNearestNeighbors(ClassifierMixin, BaseEstimator):
 
     def __init__(self, n_neighbors=1):  # noqa: D107
         self.n_neighbors = n_neighbors
+        self.points_ = []
+        self.labels_ = []
 
     def fit(self, X, y):
         """Fitting function.
