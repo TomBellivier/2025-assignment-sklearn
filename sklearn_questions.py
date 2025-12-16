@@ -199,7 +199,6 @@ class MonthlySplit(BaseCrossValidator):
         n_splits : int
             The number of splits.
         """
-
         if self.time_col == "index":
             dates = X.index
         else:
@@ -237,7 +236,6 @@ class MonthlySplit(BaseCrossValidator):
         idx_test : ndarray
             The testing set indices for that split.
         """
-
         if self.time_col == "index":
             dates = X.index
         else:
