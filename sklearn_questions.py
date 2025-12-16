@@ -128,7 +128,7 @@ class KNearestNeighbors(ClassifierMixin, BaseEstimator):
         X = validate_data(self, X, reset=False)
 
         s, f = X.shape
-        y_pred = np.zeros(s)
+        y_pred = []
 
         for sid in range(s):
             sample = X[sid]
@@ -143,9 +143,9 @@ class KNearestNeighbors(ClassifierMixin, BaseEstimator):
             
             # Take the first occurence if tie between classes
             label_id = labels_counts.argmax()
-            y_pred[sid] = nearest_labels[label_id]
+            y_pred.append(nearest_labels[label_id])
 
-        return y_pred
+        return np.array(y_pred)
 
     def score(self, X, y):
         """Calculate the score of the prediction.
