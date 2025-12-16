@@ -253,7 +253,8 @@ class MonthlySplit(BaseCrossValidator):
         else:
             periods = X[self.time_col].dt.to_period("M")
         
-        months = pd.unique(periods)
+        months = sorted(pd.unique(periods))
+
 
         n_samples = X.shape[0]
         
