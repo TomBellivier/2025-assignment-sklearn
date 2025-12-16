@@ -77,8 +77,6 @@ class KNearestNeighbors(ClassifierMixin, BaseEstimator):
 
     def __init__(self, n_neighbors=1):  # noqa: D107
         self.n_neighbors = n_neighbors
-        self.points_ = []
-        self.labels_ = []
 
     def fit(self, X, y):
         """Fitting function.
@@ -95,8 +93,14 @@ class KNearestNeighbors(ClassifierMixin, BaseEstimator):
         self : instance of KNearestNeighbors
             The current instance of the classifier
         """
-        self.points_ = X
-        self.labels_ = y
+        # Check that X and y have correct shape, set n_features_in_, etc.
+        X, y = validate_data(self, X, y)
+
+        # Store the classes seen during fit
+        self.classes_ = np.unique(y)
+
+        self.X_ = X
+        self.y_ = y
 
         self.is_fitted_ = True
 
@@ -117,6 +121,8 @@ class KNearestNeighbors(ClassifierMixin, BaseEstimator):
         """
         def d(a, b):
             return np.sqrt(np.sum((a-b)**2))
+        
+        check_is_fitted(self)
 
         s, f = X.shape
         y_pred = np.zeros(s)
@@ -124,12 +130,12 @@ class KNearestNeighbors(ClassifierMixin, BaseEstimator):
         for sid in range(s):
             sample = X[sid]
             nearest_indices = []
-            for i in range(len(self.points_)):
-                nearest_indices.append((i, d(self.points_[i], sample)))
+            for i in range(len(self.X_)):
+                nearest_indices.append((i, d(self.X_[i], sample)))
                 nearest_indices.sort(key=lambda x: x[1])
                 nearest_indices = nearest_indices[:self.n_neighbors]
 
-            nearest_labels = [self.labels_[nearest_indices[k][0]] for k in range(self.n_neighbors)]
+            nearest_labels = [self.y_[nearest_indices[k][0]] for k in range(self.n_neighbors)]
             labels_counts = np.array([nearest_labels.count(v) for v in nearest_labels])
             
             # Take the first occurence if tie between classes
