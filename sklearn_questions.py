@@ -60,6 +60,17 @@ from sklearn.utils.validation import check_is_fitted
 from sklearn.utils.validation import validate_data
 from sklearn.metrics.pairwise import pairwise_distances
 
+# A enlever
+import numpy as np
+import pandas as pd
+from numpy.testing import assert_array_equal
+
+from sklearn.utils.estimator_checks import check_estimator
+from sklearn.model_selection import train_test_split
+from sklearn.utils import shuffle
+from sklearn.datasets import make_classification
+from sklearn.neighbors import KNeighborsClassifier
+
 
 class KNearestNeighbors(ClassifierMixin, BaseEstimator):
     """KNearestNeighbors classifier."""
@@ -82,8 +93,10 @@ class KNearestNeighbors(ClassifierMixin, BaseEstimator):
         self : instance of KNearestNeighbors
             The current instance of the classifier
         """
-        self.points = X
-        self.labels = y
+        self.points_ = X
+        self.labels_ = y
+
+        self.is_fitted_ = True
 
         return self
 
@@ -109,12 +122,12 @@ class KNearestNeighbors(ClassifierMixin, BaseEstimator):
         for sid in range(s):
             sample = X[sid]
             nearest_indices = []
-            for i in range(len(self.points)):
-                nearest_indices.append((i, d(self.points[i], sample)))
+            for i in range(len(self.points_)):
+                nearest_indices.append((i, d(self.points_[i], sample)))
                 nearest_indices.sort(key=lambda x: x[1])
                 nearest_indices = nearest_indices[:self.n_neighbors]
 
-            nearest_labels = [self.labels[nearest_indices[k][0]] for k in range(self.n_neighbors)]
+            nearest_labels = [self.labels_[nearest_indices[k][0]] for k in range(self.n_neighbors)]
             labels_counts = np.array([nearest_labels.count(v) for v in nearest_labels])
             
             # Take the first occurence if tie between classes
@@ -140,9 +153,9 @@ class KNearestNeighbors(ClassifierMixin, BaseEstimator):
         """
         predicted = self.predict(X)
 
-        accuracy = 1 - np.count_nonzero(predicted - y) / y.shape[0]
+        score = round(1 - np.count_nonzero(predicted - y) / y.shape[0], 5)
 
-        return accuracy
+        return score
 
 
 class MonthlySplit(BaseCrossValidator):
@@ -224,6 +237,22 @@ class MonthlySplit(BaseCrossValidator):
             yield (
                 idx_train, idx_test
             )
+
+X, y = make_classification(n_samples=200, n_features=20,
+                               random_state=42)
+X_train, X_test, y_train, y_test = \
+        train_test_split(X, y, random_state=42)
+
+k = 1
+
+knn = KNeighborsClassifier(n_neighbors=k)
+y_pred_sk = knn.fit(X_train, y_train).predict(X_test)
+
+onn = KNearestNeighbors(k)
+y_pred_me = onn.fit(X_train, y_train).predict(X_test)
+
+print(y_pred_sk)
+print(y_pred_me)
 
 #X_train = np.array([[0, 0], [1, 1], [1, 2], [2, 1], [3, 2], [2, 3]])
 #y_train = np.array([0, 0, 0, 1, 1, 1])
