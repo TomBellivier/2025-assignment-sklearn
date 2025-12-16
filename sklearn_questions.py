@@ -124,6 +124,9 @@ class KNearestNeighbors(ClassifierMixin, BaseEstimator):
         
         check_is_fitted(self)
 
+        # Input validation
+        X = validate_data(self, X, reset=False)
+
         s, f = X.shape
         y_pred = np.zeros(s)
 
