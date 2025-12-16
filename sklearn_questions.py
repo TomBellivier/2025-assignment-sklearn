@@ -85,6 +85,8 @@ class KNearestNeighbors(ClassifierMixin, BaseEstimator):
         self.points = X
         self.labels = y
 
+        self.score = 0
+
         return self
 
     def predict(self, X):
@@ -140,9 +142,9 @@ class KNearestNeighbors(ClassifierMixin, BaseEstimator):
         """
         predicted = self.predict(X)
 
-        accuracy = 1 - np.count_nonzero(predicted - y) / y.shape[0]
+        self.score = 1 - np.count_nonzero(predicted - y) / y.shape[0]
 
-        return accuracy
+        return self.score
 
 
 class MonthlySplit(BaseCrossValidator):
