@@ -210,8 +210,13 @@ class MonthlySplit(BaseCrossValidator):
             The number of splits.
         """
 
-        min_date = X[self.time_col].min()
-        max_date = X[self.time_col].max()
+        if self.time_col == "index":
+            dates = X.index
+        else:
+            dates = X[self.time_col]
+
+        min_date = dates.min()
+        max_date = dates.max()
 
         min_month, min_year = min_date.month, min_date.year
         max_month, max_year = max_date.month, max_date.year
