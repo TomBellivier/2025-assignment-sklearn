@@ -248,30 +248,43 @@ class MonthlySplit(BaseCrossValidator):
             The testing set indices for that split.
         """
 
+        if self.time_col == "index":
+            periods = X.index.to_period("M")
+        else:
+            periods = X[self.time_col].dt.to_period("M")
+        
+        months = pd.unique(periods)
+
         n_samples = X.shape[0]
+        
         n_splits = self.get_n_splits(X, y, groups)
+
+        print(months)
+
         for i in range(n_splits):
-            idx_train = range(n_samples)
-            idx_test = range(n_samples)
+            train_period = months[i]
+            test_period = months[i+1]
+            idx_train = np.array(range(n_samples))[train_period == periods]
+            idx_test = np.array(range(n_samples))[test_period == periods]
             yield (
                 idx_train, idx_test
             )
 
-X, y = make_classification(n_samples=200, n_features=20,
-                               random_state=42)
-X_train, X_test, y_train, y_test = \
-        train_test_split(X, y, random_state=42)
+#X, y = make_classification(n_samples=200, n_features=20,
+#                               random_state=42)
+#X_train, X_test, y_train, y_test = \
+#        train_test_split(X, y, random_state=42)
 
-k = 1
+#k = 1
 
-knn = KNeighborsClassifier(n_neighbors=k)
-y_pred_sk = knn.fit(X_train, y_train).predict(X_test)
+#knn = KNeighborsClassifier(n_neighbors=k)
+#y_pred_sk = knn.fit(X_train, y_train).predict(X_test)
 
-onn = KNearestNeighbors(k)
-y_pred_me = onn.fit(X_train, y_train).predict(X_test)
+#onn = KNearestNeighbors(k)
+#y_pred_me = onn.fit(X_train, y_train).predict(X_test)
 
-print(y_pred_sk)
-print(y_pred_me)
+#print(y_pred_sk)
+#print(y_pred_me)
 
 #X_train = np.array([[0, 0], [1, 1], [1, 2], [2, 1], [3, 2], [2, 3]])
 #y_train = np.array([0, 0, 0, 1, 1, 1])
@@ -282,3 +295,22 @@ print(y_pred_me)
 #model.fit(X_train, y_train)
 #print(model.score(X_test, y_test))
 
+date = pd.date_range(start='2020-01-01', end='2021-01-31', freq='D')
+n_samples = len(date)
+X = pd.DataFrame(range(n_samples), index=date, columns=['val'])
+y = pd.DataFrame(
+        np.array([i % 2 for i in range(n_samples)]),
+        index=date
+    )
+
+print(X, y)
+M = MonthlySplit()
+print(M.get_n_splits(X))
+
+for train, test in M.split(X, y):
+
+        X_train, X_test = X.iloc[train], X.iloc[test]
+        y_train, y_test = y.iloc[train], y.iloc[test]
+
+        print(X_train.index.max(), X_test.index.min())
+        print(y_train.index.max() , y_test.index.min())
