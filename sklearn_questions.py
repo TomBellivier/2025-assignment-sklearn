@@ -247,14 +247,21 @@ class MonthlySplit(BaseCrossValidator):
         idx_test : ndarray
             The testing set indices for that split.
         """
-
+        
         if self.time_col == "index":
-            periods = X.index.to_period("M")
+            dates = X.index
         else:
-            periods = X[self.time_col].dt.to_period("M")
+            dates = X[self.time_col]
+
+        if not pd.api.types.is_datetime64_any_dtype(dates):
+            raise ValueError("The column is not of type datetime")
+
+        if isinstance(dates, pd.Index):
+            periods = dates.to_period("M")
+        else:
+            periods = dates.dt.to_period("M")
         
         months = sorted(pd.unique(periods))
-
 
         n_samples = X.shape[0]
         
