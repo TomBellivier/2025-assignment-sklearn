@@ -96,6 +96,9 @@ class KNearestNeighbors(ClassifierMixin, BaseEstimator):
         # Check that X and y have correct shape, set n_features_in_, etc.
         X, y = validate_data(self, X, y)
 
+        if y.dtype.kind == "f" and np.any(y != y.astype(int)):
+            raise ValueError("Unknowl label type: continuous")
+
         # Store the classes seen during fit
         self.classes_ = np.unique(y)
 
