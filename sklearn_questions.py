@@ -58,18 +58,6 @@ from sklearn.model_selection import BaseCrossValidator
 
 from sklearn.utils.validation import check_is_fitted
 from sklearn.utils.validation import validate_data
-from sklearn.metrics.pairwise import pairwise_distances
-
-# A enlever
-import numpy as np
-import pandas as pd
-from numpy.testing import assert_array_equal
-
-from sklearn.utils.estimator_checks import check_estimator
-from sklearn.model_selection import train_test_split
-from sklearn.utils import shuffle
-from sklearn.datasets import make_classification
-from sklearn.neighbors import KNeighborsClassifier
 
 
 class KNearestNeighbors(ClassifierMixin, BaseEstimator):
@@ -124,7 +112,7 @@ class KNearestNeighbors(ClassifierMixin, BaseEstimator):
         """
         def d(a, b):
             return np.sqrt(np.sum((a-b)**2))
-        
+
         check_is_fitted(self)
 
         # Input validation
@@ -141,9 +129,11 @@ class KNearestNeighbors(ClassifierMixin, BaseEstimator):
                 nearest_indices.sort(key=lambda x: x[1])
                 nearest_indices = nearest_indices[:self.n_neighbors]
 
-            nearest_labels = [self.y_[nearest_indices[k][0]] for k in range(self.n_neighbors)]
-            labels_counts = np.array([nearest_labels.count(v) for v in nearest_labels])
-            
+            nearest_labels = [self.y_[nearest_indices[k][0]]
+                              for k in range(self.n_neighbors)]
+            labels_counts = np.array([nearest_labels.count(v)
+                                      for v in nearest_labels])
+
             # Take the first occurence if tie between classes
             label_id = labels_counts.argmax()
             y_pred.append(nearest_labels[label_id])
@@ -223,7 +213,7 @@ class MonthlySplit(BaseCrossValidator):
 
         first_year_n = 12 - min_month + 1
 
-        nb_month = first_year_n + max_month + (max_year - min_year - 1) * 12 
+        nb_month = first_year_n + max_month + (max_year - min_year - 1) * 12
 
         return nb_month-1
 
@@ -247,7 +237,7 @@ class MonthlySplit(BaseCrossValidator):
         idx_test : ndarray
             The testing set indices for that split.
         """
-        
+
         if self.time_col == "index":
             dates = X.index
         else:
@@ -260,14 +250,11 @@ class MonthlySplit(BaseCrossValidator):
             periods = dates.to_period("M")
         else:
             periods = dates.dt.to_period("M")
-        
+
         months = sorted(pd.unique(periods))
 
         n_samples = X.shape[0]
-        
         n_splits = self.get_n_splits(X, y, groups)
-
-        print(months)
 
         for i in range(n_splits):
             train_period = months[i]
@@ -277,4 +264,3 @@ class MonthlySplit(BaseCrossValidator):
             yield (
                 idx_train, idx_test
             )
-
